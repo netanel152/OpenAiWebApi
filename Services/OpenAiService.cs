@@ -16,6 +16,7 @@ namespace OpenAiWebApi.Services
       _api = new OpenAIClient(_config.Key);
     }
 
+
     public async Task<ListResponse<AssistantResponse>> GetManyAssistants()
     {
       var assistantsList = await _api.AssistantsEndpoint.ListAssistantsAsync();
