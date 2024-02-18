@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Options;
 using OpenAI;
 using OpenAI.Assistants;
+using OpenAI.Chat;
+using OpenAI.Threads;
 using OpenAiWebApi.Configurations;
 using OpenAiWebApi.Interfaces;
 
@@ -39,6 +41,48 @@ namespace OpenAiWebApi.Services
         );
       var assistant = await _api.AssistantsEndpoint.CreateAssistantAsync(request);
       return assistant;
+    }
+
+    public async Task<AssistantResponse> ModifyAssistance(string assistantId, string? model, string? name, string? description, string? instructions, List<Tool>? tools)
+    {
+      var assistant = await GetOneAssistance(assistantId);
+      var request = new CreateAssistantRequest(
+        model ?? assistant.Model,
+        name ?? assistant.Name,
+        description ?? assistant.Description,
+        instructions ?? assistant.Instructions,
+        tools ?? assistant.Tools
+      );
+      return await _api.AssistantsEndpoint.ModifyAssistantAsync(assistantId, request);
+    }
+
+    public async Task<RunResponse> CreateThreadRun(string assistantId)
+    {
+      var assistant = await GetOneAssistance(assistantId);
+      var thread = await _api.ThreadsEndpoint.CreateThreadAsync();
+      return await thread.CreateRunAsync(assistant);
+    }
+
+    public async Task<RunResponse> GetThreadRun(string threadId, string runId)
+    {
+      var run = await _api.ThreadsEndpoint.RetrieveRunAsync(threadId, runId);
+      await run.UpdateAsync();
+      return run;
+    }
+
+    public async Task<string> CreateChatCompletionStream(string prompt, string assistantName)
+    {
+      List<OpenAI.Chat.Message> listMessage = new()
+      {
+          new OpenAI.Chat.Message(Role.Assistant, prompt, assistantName)
+      };
+      var chatRequest = new ChatRequest(listMessage);
+      var response = await _api.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
+      {
+        partialResponse.FirstChoice.Delta.ToString();
+      });
+      var choice = response.FirstChoice;
+      return choice.Message;
     }
   }
 }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OpenAI;
 using OpenAI.Assistants;
+using OpenAI.Threads;
 using OpenAiWebApi.Interfaces;
 
 namespace OpenAiWebApi.Controllers;
@@ -36,6 +37,34 @@ public class OpenAiController : ControllerBase
   public async Task<string> CreateAssistant()
   {
     var result = await _openAiService.CreateAssistance();
+    return result;
+  }
+
+  [HttpPost("modify-assistant")]
+  public async Task<AssistantResponse> ModifyAssistant(string assistantId, string? model, string? name, string? description, string? instructions, List<Tool>? tools)
+  {
+    var result = await _openAiService.ModifyAssistance(assistantId, model, name, description, instructions, tools);
+    return result;
+  }
+
+  [HttpPost("create-thread-run")]
+  public async Task<RunResponse> CreateThreadRun(string assistantId)
+  {
+    var result = await _openAiService.CreateThreadRun(assistantId);
+    return result;
+  }
+
+  [HttpGet("get-thread-run")]
+  public async Task<RunResponse> GetThreadRun(string runId, string threadId)
+  {
+    var result = await _openAiService.GetThreadRun(threadId, runId);
+    return result;
+  }
+
+  [HttpPost("send-prompt-to-assistant")]
+  public async Task<string> SendPromptToAssistant(string prompt, string assistantName)
+  {
+    var result = await _openAiService.CreateChatCompletionStream(prompt, assistantName);
     return result;
   }
 }
