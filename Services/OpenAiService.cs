@@ -83,11 +83,11 @@ namespace OpenAiWebApi.Services
       return run;
     }
 
-    public async Task<string> CreateChatCompletionStream(string prompt, string assistantName)
+    public async Task<string> CreateChatCompletionStream(PromptRequest request)
     {
       List<OpenAI.Chat.Message> listMessage = new()
       {
-          new OpenAI.Chat.Message(Role.Assistant, prompt, assistantName)
+          new OpenAI.Chat.Message(Role.System, request.Prompt)
       };
       var chatRequest = new ChatRequest(listMessage);
       var response = await _api.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>

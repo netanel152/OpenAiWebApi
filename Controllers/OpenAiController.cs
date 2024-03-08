@@ -70,9 +70,9 @@ public class OpenAiController : ControllerBase
   }
 
   [HttpPost("send-prompt-to-assistant")]
-  public async Task<string> SendPromptToAssistant(string prompt, string assistantName)
+  public async Task<string> SendPromptToAssistant([FromBody] PromptRequest request)
   {
-    var result = await _openAiService.CreateChatCompletionStream(prompt, assistantName);
+    var result = await _openAiService.CreateChatCompletionStream(request);
     return result;
   }
 
